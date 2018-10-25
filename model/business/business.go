@@ -32,3 +32,14 @@ func SaveAuthor(author entities.Author) int64 {
 
 	return rowsAffected
 }
+
+// DeleteAuthor Delete data of the author in DB
+func DeleteAuthor(author entities.Author) int64 {
+	database := connection.SqliteConnect()
+
+	statement, _ := database.Prepare("DELETE FROM Author WHERE id = ?")
+	result, _ := statement.Exec(author.ID)
+	rowsAffected, _ := result.RowsAffected()
+
+	return rowsAffected
+}

@@ -26,7 +26,8 @@ func main() {
 	routes.HandleFunc("/", getBooks).Methods("GET")
 
 	routes.HandleFunc("/authors", getAuthors).Methods("GET")
-	routes.HandleFunc("/authors", postAuthors).Methods("POST")
+	routes.HandleFunc("/authors", postAuthor).Methods("POST")
+	routes.HandleFunc("/authors", deleteAuthor).Methods("DELETE")
 
 	var port = ":4000"
 	fmt.Println("Server running in port:", port)
@@ -72,7 +73,7 @@ func getAuthors(responseWriter http.ResponseWriter, responseRead *http.Request) 
 	json.NewEncoder(responseWriter).Encode(authors)
 }
 
-func postAuthors(responseWriter http.ResponseWriter, responseRead *http.Request) {
+func postAuthor(responseWriter http.ResponseWriter, responseRead *http.Request) {
 	var author entities.Author
 
 	decoder := json.NewDecoder(responseRead.Body)
@@ -82,6 +83,15 @@ func postAuthors(responseWriter http.ResponseWriter, responseRead *http.Request)
 	}
 
 	business.SaveAuthor(author)
+}
+
+func deleteAuthor(responseWriter http.ResponseWriter, responseRead *http.Request) {
+	var author entities.Author
+
+	decoder := json.NewDecoder(responseRead.Body)
+	decoder.Decode(&author)
+
+	business.DeleteAuthor(author)
 }
 
 func getBooks(responseWriter http.ResponseWriter, responseRead *http.Request) {

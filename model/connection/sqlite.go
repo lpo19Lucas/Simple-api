@@ -14,7 +14,9 @@ func SqliteConnect() *sql.DB {
 	if connectionDb == nil {
 		fmt.Println("Connect in DB")
 		connectionDb, _ = sql.Open("sqlite3", PATH_FILE_DB)
-		return connectionDb
+		// if error != nil {
+		// 	fmt.Println("ERRO", error)
+		// }
 	}
 	return connectionDb
 }

@@ -43,12 +43,22 @@ func install() {
 
 	fmt.Println("## Create table")
 	createTableAuthors := "CREATE TABLE IF NOT EXISTS Author (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT, pass, TEXT)"
-	statement, _ := database.Prepare(createTableAuthors)
+	statement, error := database.Prepare(createTableAuthors)
+
+	if error != nil {
+		fmt.Println("Erro", error)
+	}
+
 	statement.Exec()
 	statement.Close()
 
 	fmt.Println("## Insert data in table")
-	statement, _ = database.Prepare("INSERT INTO Author (name, email, pass) VALUES (?, ?, ?)")
+	statement, error = database.Prepare("INSERT INTO Author (name, email, pass) VALUES (?, ?, ?)")
+
+	if error != nil {
+		fmt.Println("ERRO: ", error)
+	}
+
 	statement.Exec("Author 01", "author01@teste.com", "1231")
 	statement.Exec("Author 02", "author02@teste.com", "1232")
 	statement.Exec("Author 03", "author03@teste.com", "1233")
@@ -63,7 +73,15 @@ func getAuthors(responseWriter http.ResponseWriter, responseRead *http.Request) 
 }
 
 func postAuthors(responseWriter http.ResponseWriter, responseRead *http.Request) {
-	fmt.Println("Call the POST")
+	var author entities.Author
+
+	decoder := json.NewDecoder(responseRead.Body)
+	err := decoder.Decode(&author)
+	if err != nil {
+		fmt.Println("Erro", err)
+	}
+
+	business.SaveAuthor(author)
 }
 
 func getBooks(responseWriter http.ResponseWriter, responseRead *http.Request) {

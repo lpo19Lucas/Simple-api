@@ -9,7 +9,7 @@ import (
 func GetAllAuthor(author *entities.Author) []entities.Author {
 	var authorList []entities.Author
 
-	database := connection.SqliteConnect()
+	database := connection.MySqlConnect()
 
 	rows, _ := database.Query("SELECT id, name, email, pass FROM Author")
 	for rows.Next() {
@@ -24,7 +24,7 @@ func GetAllAuthor(author *entities.Author) []entities.Author {
 
 // SaveAuthor Save a author in DB
 func SaveAuthor(author entities.Author) int64 {
-	database := connection.SqliteConnect()
+	database := connection.MySqlConnect()
 
 	statement, _ := database.Prepare("INSERT INTO Author (name, email, pass) VALUES (?, ?, ?)")
 	result, _ := statement.Exec(author.Name, author.Email, author.Pass)
@@ -35,7 +35,7 @@ func SaveAuthor(author entities.Author) int64 {
 
 // DeleteAuthor Delete data of the author in DB
 func DeleteAuthor(author entities.Author) int64 {
-	database := connection.SqliteConnect()
+	database := connection.MySqlConnect()
 
 	statement, _ := database.Prepare("DELETE FROM Author WHERE id = ?")
 	result, _ := statement.Exec(author.ID)

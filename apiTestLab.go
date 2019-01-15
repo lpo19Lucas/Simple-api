@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 
 	"apiTestLab/model/business"
 	"apiTestLab/model/connection"
@@ -16,10 +15,7 @@ import (
 )
 
 func main() {
-	_, err := os.Stat(connection.PATH_FILE_DB)
-	if err != nil && os.IsNotExist(err) {
-		install()
-	}
+	install()
 
 	routes := mux.NewRouter().StrictSlash(true)
 
@@ -29,7 +25,7 @@ func main() {
 	routes.HandleFunc("/authors", postAuthor).Methods("POST")
 	routes.HandleFunc("/authors", deleteAuthor).Methods("DELETE")
 
-	var port = ":4000"
+	var port = ":3000"
 	fmt.Println("Server running in port:", port)
 	log.Fatal(http.ListenAndServe(port, routes))
 }
@@ -40,30 +36,36 @@ func main() {
  */
 func install() {
 	fmt.Println("## Create database")
-	database := connection.SqliteConnect()
+	database := connection.MySqlConnect()
 
-	fmt.Println("## Create table")
-	createTableAuthors := "CREATE TABLE IF NOT EXISTS Author (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT, pass, TEXT)"
-	statement, error := database.Prepare(createTableAuthors)
+	selectTableAuthors := "SELECT * FROM Author"
+	rows, _ := database.Query(selectTableAuthors)
 
-	if error != nil {
-		fmt.Println("Erro", error)
+	if rows == nil {
+		fmt.Println("## Create table")
+		createTableAuthors := "CREATE TABLE IF NOT EXISTS Author (id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(255), email VARCHAR(255), pass VARCHAR(255))"
+		statement, error := database.Prepare(createTableAuthors)
+
+		if error != nil {
+			fmt.Println("Erro", error)
+		}
+
+		statement.Exec()
+		statement.Close()
+
+		fmt.Println("## Insert data in table")
+		statement, error = database.Prepare("INSERT INTO Author (name, email, pass) VALUES (?, ?, ?)")
+
+		if error != nil {
+			fmt.Println("ERRO: ", error)
+		}
+
+		statement.Exec("Lucas", "lucas01@teste.com", "1231")
+		statement.Exec("Aurino", "author02@teste.com", "1232")
+		statement.Exec("Ed", "author03@teste.com", "1233")
+		statement.Close()
 	}
 
-	statement.Exec()
-	statement.Close()
-
-	fmt.Println("## Insert data in table")
-	statement, error = database.Prepare("INSERT INTO Author (name, email, pass) VALUES (?, ?, ?)")
-
-	if error != nil {
-		fmt.Println("ERRO: ", error)
-	}
-
-	statement.Exec("Author 01", "author01@teste.com", "1231")
-	statement.Exec("Author 02", "author02@teste.com", "1232")
-	statement.Exec("Author 03", "author03@teste.com", "1233")
-	statement.Close()
 }
 
 func getAuthors(responseWriter http.ResponseWriter, responseRead *http.Request) {
